@@ -1,11 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   AreaChart,
   Area,
@@ -14,7 +9,6 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-
 
 const AdminSales = () => {
   const [stats, setStats] = useState({
@@ -29,7 +23,7 @@ const AdminSales = () => {
     try {
       const token = localStorage.getItem("accessToken");
       const res = await axios.get(
-        "http://localhost:8000/api/v1/orders/sales",
+        "https://e-commerce-production-b93b.up.railway.app/api/v1/orders/sales",
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -55,28 +49,36 @@ const AdminSales = () => {
           <CardHeader>
             <CardTitle>Total Users</CardTitle>
           </CardHeader>
-          <CardContent className="text-2xl font-bold">{stats.totalUsers}</CardContent>
+          <CardContent className="text-2xl font-bold">
+            {stats.totalUsers}
+          </CardContent>
         </Card>
 
         <Card className="bg-pink-500 text-white shadow">
           <CardHeader>
             <CardTitle>Total Products</CardTitle>
           </CardHeader>
-          <CardContent className="text-2xl font-bold">{stats.totalProducts}</CardContent>
+          <CardContent className="text-2xl font-bold">
+            {stats.totalProducts}
+          </CardContent>
         </Card>
 
         <Card className="bg-pink-500 text-white shadow">
           <CardHeader>
             <CardTitle>Total Orders</CardTitle>
           </CardHeader>
-          <CardContent className="text-2xl font-bold">{stats.totalOrders}</CardContent>
+          <CardContent className="text-2xl font-bold">
+            {stats.totalOrders}
+          </CardContent>
         </Card>
 
         <Card className="bg-pink-500 text-white shadow">
           <CardHeader>
             <CardTitle>Total Sales</CardTitle>
           </CardHeader>
-          <CardContent className="text-2xl font-bold">₹{stats.totalSales.toLocaleString()}</CardContent>
+          <CardContent className="text-2xl font-bold">
+            ₹{stats.totalSales.toLocaleString()}
+          </CardContent>
         </Card>
 
         {/* Sales Chart */}
@@ -90,14 +92,19 @@ const AdminSales = () => {
                 <XAxis dataKey="date" />
                 <YAxis />
                 <Tooltip />
-                <Area type="monotone" dataKey="amount" stroke="#F472B6" fill="#F472B6" />
+                <Area
+                  type="monotone"
+                  dataKey="amount"
+                  stroke="#F472B6"
+                  fill="#F472B6"
+                />
               </AreaChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default AdminSales
+export default AdminSales;

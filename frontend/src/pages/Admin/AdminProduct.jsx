@@ -1,15 +1,31 @@
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
-import { Card } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { setProducts } from '@/redux/productSlice'
-import axios from 'axios'
-import { Edit, Search, Trash2 } from 'lucide-react'
-import React, { useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { toast } from 'sonner'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useNavigate } from 'react-router-dom'
-import { Button } from "@/components/ui/button"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { setProducts } from "@/redux/productSlice";
+import axios from "axios";
+import { Edit, Search, Trash2 } from "lucide-react";
+import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -19,42 +35,46 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { Textarea } from '@/components/ui/textarea'
-import ImageUpload from '@/components/ImageUpload'
-
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import ImageUpload from "@/components/ImageUpload";
 
 const AdminProduct = () => {
-  const { products } = useSelector(store => store.product)
-  const [sortOrder, setSortOrder] = useState("")
-  const [searchTerm, setSearchTerm] = useState("")
-  const [editProduct, setEditProduct] = useState(null)
-  const [open, setOpen] = useState(false)
-  const accessToken = localStorage.getItem("accessToken")
-  const dispatch = useDispatch()
+  const { products } = useSelector((store) => store.product);
+  const [sortOrder, setSortOrder] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [editProduct, setEditProduct] = useState(null);
+  const [open, setOpen] = useState(false);
+  const accessToken = localStorage.getItem("accessToken");
+  const dispatch = useDispatch();
 
-  let filteredProducts = products.filter((product) =>
-    product.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.category.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  let filteredProducts = products.filter(
+    (product) =>
+      product.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.category.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   if (sortOrder === "lowToHigh") {
-    filteredProducts = [...filteredProducts].sort((a, b) => a.productPrice - b.productPrice)
+    filteredProducts = [...filteredProducts].sort(
+      (a, b) => a.productPrice - b.productPrice
+    );
   }
   if (sortOrder === "highToLow") {
-    filteredProducts = [...filteredProducts].sort((a, b) => b.productPrice - a.productPrice)
+    filteredProducts = [...filteredProducts].sort(
+      (a, b) => b.productPrice - a.productPrice
+    );
   }
 
   // Handle input changes
   const handleChange = (e) => {
-    const { name, value } = e.target
-    setEditProduct(prev => ({
+    const { name, value } = e.target;
+    setEditProduct((prev) => ({
       ...prev,
-      [name]: value
-    }))
-  }
+      [name]: value,
+    }));
+  };
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -74,7 +94,6 @@ const AdminProduct = () => {
 
     formData.append("existingImages", JSON.stringify(existingImages));
 
-
     // ✅ Add new files
     editProduct.productImg
       .filter((img) => img instanceof File) // only new uploaded files
@@ -84,14 +103,14 @@ const AdminProduct = () => {
 
     try {
       const res = await axios.put(
-        `http://localhost:8000/api/v1/product/update/${editProduct._id}`,
+        `https://e-commerce-production-b93b.up.railway.app/api/v1/product/update/${editProduct._id}`,
         formData,
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
 
       if (res.data.success) {
         toast.success("Product updated successfully");
-        setOpen(false)
+        setOpen(false);
         // update redux state
         const updatedProducts = products.map((p) =>
           p._id === editProduct._id ? res.data.product : p
@@ -101,38 +120,43 @@ const AdminProduct = () => {
     } catch (error) {
       toast.error("Something went wrong");
       console.log(error);
-
     }
   };
 
   const deleteProductHandler = async (productId) => {
     try {
-      const remainingProducts = products.filter((product) => product._id !== productId)
-      const res = await axios.delete(`http://localhost:8000/api/v1/product/delete/${productId}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`
+      const remainingProducts = products.filter(
+        (product) => product._id !== productId
+      );
+      const res = await axios.delete(
+        `https://e-commerce-production-b93b.up.railway.app/api/v1/product/delete/${productId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
         }
-      })
+      );
       if (res.data.success) {
-        toast.success(res.data.message)
-        dispatch(setProducts(remainingProducts))
-
+        toast.success(res.data.message);
+        dispatch(setProducts(remainingProducts));
       }
     } catch (error) {
-      toast.error("Something went wrong")
+      toast.error("Something went wrong");
     }
-  }
+  };
 
   return (
-    <div className='pl-[350px] py-20 pr-20 flex flex-col gap-3 min-h-screen bg-gray-100'>
-      <div className='flex justify-between'>
-        <div className='relative bg-white rounded-lg'>
-          <Input type="text"
+    <div className="pl-[350px] py-20 pr-20 flex flex-col gap-3 min-h-screen bg-gray-100">
+      <div className="flex justify-between">
+        <div className="relative bg-white rounded-lg">
+          <Input
+            type="text"
             placeholder="Search Product..."
             className="w-[400px] items-center "
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)} />
-          <Search className='absolute right-3 top-1.5 text-gray-500' />
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <Search className="absolute right-3 top-1.5 text-gray-500" />
         </div>
 
         <Select onValueChange={(value) => setSortOrder(value)}>
@@ -145,26 +169,39 @@ const AdminProduct = () => {
           </SelectContent>
         </Select>
       </div>
-      {
-        filteredProducts.map((product, index) => {
-          return <Card key={index} className='px-4'>
-            <div className='flex items-center justify-between'>
-              <div className='flex gap-2 items-center'>
-                <img src={product.productImg[0]?.url} alt="" className='w-25 h-25' />
-                <h1 className='font-bold w-96 text-gray-700'>{product.productName}</h1>
+      {filteredProducts.map((product, index) => {
+        return (
+          <Card key={index} className="px-4">
+            <div className="flex items-center justify-between">
+              <div className="flex gap-2 items-center">
+                <img
+                  src={product.productImg[0]?.url}
+                  alt=""
+                  className="w-25 h-25"
+                />
+                <h1 className="font-bold w-96 text-gray-700">
+                  {product.productName}
+                </h1>
               </div>
-              <h1 className='font-semibold text-gray-800'>₹{product.productPrice}</h1>
-              <div className='flex gap-3'>
+              <h1 className="font-semibold text-gray-800">
+                ₹{product.productPrice}
+              </h1>
+              <div className="flex gap-3">
                 <Dialog open={open} onOpenChange={setOpen}>
                   <DialogTrigger asChild>
-                    <Edit onClick={() => {setOpen(true),setEditProduct(product)}} className='text-green-500 cursor-pointer' />
+                    <Edit
+                      onClick={() => {
+                        setOpen(true), setEditProduct(product);
+                      }}
+                      className="text-green-500 cursor-pointer"
+                    />
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-[625px] max-h-[740px] overflow-y-scroll">
                     <DialogHeader>
                       <DialogTitle>Edit Product</DialogTitle>
                       <DialogDescription>
-                        Make changes to your product here. Click save when you&apos;re
-                        done.
+                        Make changes to your product here. Click save when
+                        you&apos;re done.
                       </DialogDescription>
                     </DialogHeader>
                     <div className="flex flex-col gap-2">
@@ -190,7 +227,7 @@ const AdminProduct = () => {
                           required
                         />
                       </div>
-                      <div className='grid grid-cols-2 gap-4'>
+                      <div className="grid grid-cols-2 gap-4">
                         <div className="grid gap-2">
                           <Label>Brand</Label>
                           <Input
@@ -225,43 +262,54 @@ const AdminProduct = () => {
                           placeholder="Enter brief description of product"
                         />
                       </div>
-                      <ImageUpload productData={editProduct} setProductData={setEditProduct} />
+                      <ImageUpload
+                        productData={editProduct}
+                        setProductData={setEditProduct}
+                      />
                     </div>
                     <DialogFooter>
                       <DialogClose asChild>
                         <Button variant="outline">Cancel</Button>
                       </DialogClose>
-                      <Button onClick={handleSave} type="submit">Save changes</Button>
+                      <Button onClick={handleSave} type="submit">
+                        Save changes
+                      </Button>
                     </DialogFooter>
                   </DialogContent>
-
                 </Dialog>
                 {/* -----------------X----------------- */}
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Trash2 className='text-red-500 cursor-pointer' />
+                    <Trash2 className="text-red-500 cursor-pointer" />
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
-                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                      <AlertDialogTitle>
+                        Are you absolutely sure?
+                      </AlertDialogTitle>
                       <AlertDialogDescription>
-                        This action cannot be undone. This will permanently delete your
-                        product and remove your data from our servers.
+                        This action cannot be undone. This will permanently
+                        delete your product and remove your data from our
+                        servers.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => deleteProductHandler(product._id)}>Continue</AlertDialogAction>
+                      <AlertDialogAction
+                        onClick={() => deleteProductHandler(product._id)}
+                      >
+                        Continue
+                      </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
               </div>
             </div>
           </Card>
-        })
-      }
+        );
+      })}
     </div>
-  )
-}
+  );
+};
 
-export default AdminProduct
+export default AdminProduct;
