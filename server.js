@@ -27,6 +27,30 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+let isConnected = false;
+
+async function connectToMongoDB() {
+  try {
+    await mongoose.connect(process.env.MONGO_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    isConnected = true;
+    console.log("MongoDB connected successfully");
+  } catch (error) {
+    console.log(error);
+    console.log("MongoDB connection failed");
+  }
+}
+
+app.use((req, res, next) => {
+  if (!isConnected) {
+    connectToMongoDB();
+  }
+  next();
+});
+
 app.use("/uploads", express.static("uploads"));
 
 app.use("/api/v1/user", userRoute);
@@ -35,31 +59,33 @@ app.use("/api/v1/cart", cartRoute);
 app.use("/api/v1/orders", orderRoute);
 
 /** ---------- Serve Frontend in PRODUCTION ---------- */
-if (process.env.NODE_ENV === "production") {
-  // 👉 If using Vite: frontend/dist
-  const frontendPath = path.join(__dirname, "frontend", "dist");
+// if (process.env.NODE_ENV === "production") {
+//   // 👉 If using Vite: frontend/dist
+//   const frontendPath = path.join(__dirname, "frontend", "dist");
 
-  // 👉 If using CRA instead, use:
-  // const frontendPath = path.join(__dirname, "frontend", "build");
+//   // 👉 If using CRA instead, use:
+//   // const frontendPath = path.join(__dirname, "frontend", "build");
 
-  // Serve static assets
-  app.use(express.static(frontendPath));
+//   // Serve static assets
+//   app.use(express.static(frontendPath));
 
-  // Fallback: any non-API route → index.html
-  app.use((req, res, next) => {
-    if (req.originalUrl.startsWith("/api")) {
-      return next(); // let API routes continue to 404 handler if not matched
-    }
-    return res.sendFile(path.join(frontendPath, "index.html"));
-  });
-} else {
-  // Simple dev root route
-  app.get("/", (req, res) => {
-    res.send("Backend running (dev) 🚀");
-  });
-}
+//   // Fallback: any non-API route → index.html
+//   app.use((req, res, next) => {
+//     if (req.originalUrl.startsWith("/api")) {
+//       return next(); // let API routes continue to 404 handler if not matched
+//     }
+//     return res.sendFile(path.join(frontendPath, "index.html"));
+//   });
+// } else {
+//   // Simple dev root route
+//   app.get("/", (req, res) => {
+//     res.send("Backend running (dev) 🚀");
+//   });
+// }
 
-app.listen(PORT, () => {
-  connectDB();
-  console.log(`Server is listening at port:${PORT}`);
-});
+// app.listen(PORT, () => {
+//   connectDB();
+//   console.log(`Server is listening at port:${PORT}`);
+// });
+
+module.exports = app;
