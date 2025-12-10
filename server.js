@@ -91,7 +91,7 @@ connectDB();
 app.use(express.json());
 app.use(
   cors({
-    origin: "*",
+    origin: "https://e-commerce-frontend-two-delta.vercel.app/",
     credentials: true,
   })
 );
