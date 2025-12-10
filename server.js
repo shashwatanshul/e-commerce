@@ -91,10 +91,7 @@ connectDB();
 app.use(express.json());
 app.use(
   cors({
-    origin:
-      process.env.NODE_ENV === "production"
-        ? "https://e-commerce-frontend-7xfl9y2i4-shashwat-singhs-projects.vercel.app"
-        : "http://localhost:5173", // Update origin for prod
+    origin: "*",
     credentials: true,
   })
 );
