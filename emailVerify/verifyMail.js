@@ -17,7 +17,7 @@ export const verifyEmail = (token, email) => {
     text: `Hi! There, You have recently visited 
                our website and entered your email.
                Please follow the given link to verify your email
-               https://e-commerce-production-b93b.up.railway.app/verify/${token} 
+               https://e-commerce-frontend-two-delta.vercel.app/verify/${token} 
                Thanks`,
   };
 
