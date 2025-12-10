@@ -93,11 +93,9 @@ app.use(
   cors({
     origin:
       process.env.NODE_ENV === "production"
-        ? "https://your-frontend-domain.com"
+        ? "https://e-commerce-l3ci-hvhodrd1l-shashwat-singhs-projects.vercel.app"
         : "http://localhost:5173", // Update origin for prod
     credentials: true,
-    methods: ["POST", "GET", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
