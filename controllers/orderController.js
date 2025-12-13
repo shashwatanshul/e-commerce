@@ -130,6 +130,7 @@ export const getUserOrders = async (req, res) => {
     const { userId } = req.params; // userId will come from URL
 
     const orders = await Order.find({ user: userId })
+      .sort({ createdAt: -1 })
       .populate({
         path: "products.productId",
         select: "productName productPrice productImg"
@@ -155,6 +156,7 @@ export const getMyOrder = async (req, res) => {
   try {
     const userId = req.id; // userId will come from URL
     const orders = await Order.find({ user: userId })
+      .sort({ createdAt: -1 })
       .populate({
         path: "products.productId",
         select: "productName productPrice productImg"
