@@ -87,9 +87,11 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// Connect to DB once on startup
-// Connect to DB once on startup
-connectDB();
+// Connect to DB for Vercel (awaiting connection before request)
+app.use(async (req, res, next) => {
+  await connectDB();
+  next();
+});
 
 const aj = arcjet({
   key: process.env.ARCJET_KEY,
