@@ -74,7 +74,11 @@ import productRoute from "./routes/productRoute.js";
 import cartRoute from "./routes/cartRoute.js";
 import orderRoute from "./routes/orderRoute.js";
 import cors from "cors";
-
+import helmet from "helmet";
+import arcjet, { shield, slidingWindow, detectBot } from "@arcjet/node";
+import mongoSanitize from "express-mongo-sanitize";
+import xss from "xss-clean";
+import hpp from "hpp";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -85,9 +89,51 @@ const __dirname = path.dirname(__filename);
 const app = express();
 
 // Connect to DB once on startup
+// Connect to DB once on startup
 connectDB();
 
+const aj = arcjet({
+  key: process.env.ARCJET_KEY,
+  characteristics: ["ip.src"], // Track requests by IP
+  rules: [
+    shield({ mode: "LIVE" }),
+    detectBot({
+      mode: "LIVE", 
+      allow: ["CATEGORY:SEARCH_ENGINE"],
+    }),
+    slidingWindow({
+      mode: "LIVE",
+      interval: "1m",
+      max: 100,
+    }),
+  ],
+});
+
 // Middleware
+app.use(helmet());
+app.use(mongoSanitize());
+app.use(xss());
+app.use(hpp());
+
+app.use(async (req, res, next) => {
+  try {
+    const decision = await aj.protect(req, { requested: 1 });
+    if (decision.isDenied()) {
+      if (decision.reason.isRateLimit()) {
+        return res.status(429).json({ error: "Too many requests" });
+      } else if (decision.reason.isBot()) {
+        return res.status(403).json({ error: "No bots allowed" });
+      } else {
+        return res.status(403).json({ error: "Forbidden" });
+      }
+    }
+    next();
+  } catch (error) {
+    console.error("Arcjet error", error);
+    next(error);
+  }
+});
+
 app.use(express.json());
 app.use(
   cors({
