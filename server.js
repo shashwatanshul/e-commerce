@@ -76,9 +76,8 @@ import orderRoute from "./routes/orderRoute.js";
 import cors from "cors";
 import helmet from "helmet";
 import arcjet, { shield, slidingWindow, detectBot } from "@arcjet/node";
-import mongoSanitize from "express-mongo-sanitize";
-import xss from "xss-clean";
 import hpp from "hpp";
+import { securityMiddleware, queryFixMiddleware } from "./middleware/security.js";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -111,8 +110,12 @@ const aj = arcjet({
 
 // Middleware
 app.use(helmet());
-app.use(mongoSanitize());
-app.use(xss());
+app.use(express.json());
+
+// Fix Express 5 query immutability for downstream middlewares like HPP
+app.use(queryFixMiddleware);
+
+app.use(securityMiddleware);
 app.use(hpp());
 
 app.use(async (req, res, next) => {
@@ -133,8 +136,6 @@ app.use(async (req, res, next) => {
     next(error);
   }
 });
-
-app.use(express.json());
 app.use(
   cors({
     origin: "https://e-commerce-frontend-two-delta.vercel.app",
